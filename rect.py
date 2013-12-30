@@ -37,8 +37,8 @@ class Rect:
     def bounce(self):
         if self.y > 450 or self.y < 0:
             self.sdy = self.sdy * -1
-        if self.x > 650 or self.x < 0:
-            self.sdx = self.sdx * -1         
+        #if self.x > 650 or self.x < 0:
+        #    self.sdx = self.sdx * -1         
            
     def increaseSpeed(self):
         if self.sdx < 0:
@@ -50,14 +50,16 @@ class Rect:
         else:
             self.sdy = self.sdy + 1 
 
-    def update(self):
+    def update(self, screen, leftScore, rightScore):
         self.x += self.sdx
         self.y += self.sdy
+        #self.hitLeft(screen, rightScore)
+        #self.hitRight(screen, leftScore)
         self.bounce()
         
         pygame.draw.rect(screen, white, [self.x, self.y, 50, 50])
         pygame.draw.rect(screen, green, [self.x + 10, self.y + 10, 30, 30])
-        
+          
 # Define some colors
 black = ( 0, 0, 0)
 white = ( 255, 255, 255)
@@ -69,7 +71,7 @@ pygame.init()
 # Set the height and width of the screen
 size = [700, 500]
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption("Bouncing Rectangle")
+pygame.display.set_caption("Pong")
 
 #Loop until the user clicks the close button.
 done = False
@@ -95,6 +97,11 @@ rect_change_y = 5
 rect_change_x2 = 5
 rect_change_y2 = 5
 
+#score counter
+#-------------
+leftScore = 0
+rightScore = 0
+
 # -------- Main Program Loop -----------
 while done == False:
   for event in pygame.event.get(): # User did something
@@ -103,6 +110,14 @@ while done == False:
       
   # Set the screen background
   screen.fill(black)
+  
+  #display score
+  #-------------
+  fontobject=pygame.font.SysFont('Arial', 18)
+  screen.blit(fontobject.render(str(leftScore), 1, (255, 255, 255)),
+                ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
+  screen.blit(fontobject.render(str(rightScore), 1, (255, 255, 255)),
+                ((screen.get_width() / 2) + 100, (screen.get_height() / 2) - 10))
   
   for i in range(len(list) -1):
       for j in range(i+1,len(list)):
@@ -124,7 +139,7 @@ while done == False:
      square.sdx = square.sdx * -1
      
   rx = square.x - rightPad.x
-  ry = square.x - rightPad.x
+  ry = square.y - rightPad.y
   if abs(rx) < 65 and abs(ry) < 50:
       square.sdx = square.sdx * -1  
                   
@@ -138,10 +153,20 @@ while done == False:
         rightPad.moveUp()
       if event.key == K_DOWN:
         rightPad.moveDown()
-                                   
+        
+  #hit wall
+  if square.x > 650:
+            square.x = screen.get_width() / 2
+            square.y = screen.get_height() / 2 
+            leftScore = leftScore + 1
+            
+  if square.x < 0:
+            square.x = screen.get_width() / 2
+            square.y = screen.get_height() / 2 
+            rightScore = rightScore + 1
   
   for rect in list:
-      rect.update()
+      rect.update(screen, leftScore, rightScore)
   for pad in plist:
       pad.update()
   
